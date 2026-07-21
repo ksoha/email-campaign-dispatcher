@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
+
 	"os"
 )
 
@@ -11,6 +11,11 @@ import (
 
 // will recieve the data file in this function
 func loadRecipients(filePath string, ch chan Recipient) error {
+
+	//closing the channel after the function is done executing
+	//otherwise the consumer will keep waiting forever for the data to be sent which will cause a deadlock
+	defer close(ch)
+
 	//logic to read the file
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -28,7 +33,6 @@ func loadRecipients(filePath string, ch chan Recipient) error {
 
 	//looping through the records
 	for _, record := range record[1:] {
-		fmt.Println(record)
 
 		//send -> consumer
 		//implementing a queue tyoe structure using channels
