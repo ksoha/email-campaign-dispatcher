@@ -1,4 +1,4 @@
-package main
+package mail
 
 import (
 	"encoding/csv"
@@ -10,7 +10,7 @@ import (
 //making the producer a part of main package
 
 // will recieve the data file in this function
-func loadRecipients(filePath string, ch chan Recipient) error {
+func LoadRecipients(filePath string, ch chan Recipient) error {
 
 	//closing the channel after the function is done executing
 	//otherwise the consumer will keep waiting forever for the data to be sent which will cause a deadlock

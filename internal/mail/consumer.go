@@ -1,4 +1,4 @@
-package main
+package mail
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func emailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
+func EmailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	//listen to the channel

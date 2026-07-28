@@ -4,24 +4,20 @@ import (
 	"bytes"
 	"html/template"
 	"sync"
-)
 
-// struct of a receipient
-type Recipient struct {
-	Name  string
-	Email string
-}
+	"github.com/ksoha/email-dispatcher/internal/mail"
+)
 
 func main() {
 
 	//cerating channel
 	//not giving size inside make to make it unbuffered
-	recipient := make(chan Recipient)
+	recipient := make(chan mail.Recipient)
 
 	//running producer and consumer inside the main thread/function will cause a deadlock
 	//running them in separate go rountines
 	go func() {
-		loadRecipients("emails.csv", recipient)
+		mail.LoadRecipients("emails.csv", recipient)
 	}()
 
 	//using wait group to wait for the all the goroutines to finish their work
@@ -32,7 +28,7 @@ func main() {
 
 	for i := 0; i < workerCount; i++ {
 		wg.Add(1) //adding a worker to the wait group
-		go emailWorker(i, recipient, &wg)
+		go mail.EmailWorker(i, recipient, &wg)
 	}
 
 	wg.Wait() //waiting for all the workers to finish their work
@@ -40,7 +36,7 @@ func main() {
 }
 
 // function to execute the template
-func executeTemplate(r Recipient) (string, error) {
+func executeTemplate(r mail.Recipient) (string, error) {
 	t, err := template.ParseFiles("email.tmpl")
 	if err != nil {
 		return "", err
