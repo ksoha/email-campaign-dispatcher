@@ -6,8 +6,7 @@ import (
 	"github.com/ksoha/email-dispatcher/internal/models"
 )
 
-//recipient query
-
+// recipient query
 func GetRecipient(db *sql.DB) ([]models.Recipient, error) {
 	//slice to store the recipients
 	var recipients []models.Recipient
@@ -45,4 +44,24 @@ func GetRecipient(db *sql.DB) ([]models.Recipient, error) {
 		recipients = append(recipients, recipient)
 	}
 	return recipients, nil
+}
+
+//to create new recipient in the database
+
+func CreateRecipient(db *sql.DB, recipient models.CreateRecipientRequest) error {
+
+	query := `
+	 INSERT INTO recipients (name, email)
+	 VALUES ($1, $2)`
+
+	//insert the recipient into the database
+	_, err := db.Exec(
+		query,
+		recipient.Name,
+		recipient.Email,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -19,10 +19,16 @@ func main() {
 	//create router
 	router := http.NewServeMux()
 
-	//register the handler for the /recipients endpoint
+	//route GET/Recipients
 	router.HandleFunc(
 		"GET /recipients",
 		handlers.GetRecipientsHandler(db),
+	)
+
+	//route POST/Recipients/Import
+	router.HandleFunc(
+		"POST /recipients/import",
+		handlers.CreateRecipientHandler(db),
 	)
 
 	// Start server
