@@ -31,6 +31,12 @@ func main() {
 		handlers.CreateRecipientHandler(db),
 	)
 
+	//route POST/login
+	router.HandleFunc(
+		"POST /login",
+		handlers.LoginHandler(db),
+	)
+
 	// Start server
 	log.Println("Server running on :8080")
 
