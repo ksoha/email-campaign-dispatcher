@@ -6,9 +6,16 @@ import (
 	"net/smtp"
 	"sync"
 	"time"
+
+	"github.com/ksoha/email-dispatcher/internal/models"
 )
 
-func EmailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
+func EmailWorker(
+	id int,
+	ch chan models.Recipient,
+	campaign models.Campaign,
+	wg *sync.WaitGroup,
+) {
 	defer wg.Done()
 
 	//listen to the channel
@@ -24,7 +31,7 @@ func EmailWorker(id int, ch chan Recipient, wg *sync.WaitGroup) {
 		// //using a slice of bytes to sen the email message
 		// msg := []byte(formattedMsg)
 
-		msg, err := executeTemplate(recipient)
+		msg, err := executeTemplate(recipient, campaign)
 		if err != nil {
 			fmt.Printf("Worker %d failed to execute template for %s: %v\n", id, recipient.Email, err)
 			continue

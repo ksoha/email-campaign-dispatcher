@@ -79,3 +79,36 @@ func GetCampaigns(db *sql.DB) ([]models.Campaign, error) {
 
 	return campaigns, nil
 }
+
+// GetCampaignByID retrieves a campaign by its ID from the database.
+func GetCampaignByID(db *sql.DB, campaignID string) (models.Campaign, error) {
+
+	query := `
+	    SELECT
+		id, 
+		user_id, 
+		name, 
+		subject, 
+		body, 
+		created_at, 
+		updated_at
+		FROM campaigns
+		WHERE id = $1
+		`
+	var campaign models.Campaign
+
+	err := db.QueryRow(query, campaignID).Scan(
+		&campaign.ID,
+		&campaign.UserID,
+		&campaign.Name,
+		&campaign.Subject,
+		&campaign.Body,
+		&campaign.CreatedAt,
+		&campaign.UpdatedAt,
+	)
+	if err != nil {
+		return models.Campaign{}, err
+	}
+
+	return campaign, nil
+}

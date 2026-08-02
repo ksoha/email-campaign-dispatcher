@@ -3,23 +3,38 @@ package mail
 import (
 	"bytes"
 	"html/template"
+
+	"github.com/ksoha/email-dispatcher/internal/models"
 )
 
+// Data that will be available inside email.tmpl
+type TemplateData struct {
+	Recipient models.Recipient
+	Campaign  models.Campaign
+}
+
 // function to execute the template
-func executeTemplate(r Recipient) (string, error) {
+func executeTemplate(
+	recipient models.Recipient,
+	campaign models.Campaign,
+) (string, error) {
+
 	t, err := template.ParseFiles("email.tmpl")
 	if err != nil {
 		return "", err
 	}
 
-	var tpl bytes.Buffer //buffer to hold the executed template
+	var tpl bytes.Buffer
 
-	//passing the recipient , because its a struct which has access to the fields(name in template)
-	e := t.Execute(&tpl, r) //executing the template with the recipient data
-	if e != nil {
-		return "", e
+	data := TemplateData{
+		Recipient: recipient,
+		Campaign:  campaign,
 	}
 
-	return tpl.String(), nil //returning the executed template as a string
+	err = t.Execute(&tpl, data)
+	if err != nil {
+		return "", err
+	}
 
+	return tpl.String(), nil
 }

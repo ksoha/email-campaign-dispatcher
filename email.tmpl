@@ -1,8 +1,10 @@
-To: {{.Email}}
-Subject : Hello {{.Name}}
+To: {{.Recipient.Email}}
+Subject: {{.Campaign.Subject}}
 
-Hi {{.Name}}, Welcome to our service!
+Hi {{.Recipient.Name}},
+
+{{.Campaign.Body}}
 
 
-Thanks, 
-SK Campeign Team. 
+Thanks,
+SK Campaign Team.

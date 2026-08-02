@@ -47,6 +47,12 @@ func main() {
 		handlers.GetCampaignsHandler(db),
 	)
 
+	// route POST /campaigns/{id}/send
+	router.HandleFunc(
+		"POST /campaigns/{id}/send",
+		handlers.SendCampaignHandler(db),
+	)
+
 	// Start server
 	log.Println("Server running on :8080")
 
