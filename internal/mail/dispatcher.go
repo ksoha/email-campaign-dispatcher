@@ -10,7 +10,7 @@ func SendCampaign(campaign models.Campaign, recipients []models.Recipient) error
 
 	const workerCount = 5
 
-	//chanel through which workers recieve the recipients
+	//chanel through which workers recieve the recipients.
 	ch := make(chan models.Recipient)
 
 	var wg sync.WaitGroup //WaitGroup to wait for all the workers to finish
