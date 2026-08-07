@@ -93,7 +93,7 @@ func GetCampaignsHandler(db *sql.DB) http.HandlerFunc {
 func SendCampaignHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		log.Println("🔥 SEND CAMPAIGN HANDLER HIT")
+		log.Println(" SEND CAMPAIGN HANDLER HIT")
 
 		// Get campaign ID from URL
 		campaignID := r.PathValue("id")
