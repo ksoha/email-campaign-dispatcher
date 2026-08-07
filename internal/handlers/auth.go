@@ -36,13 +36,13 @@ func LoginHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		//check if the password matches to hash stored in the database
+		// Check if password matches the hash stored in database
 		err = auth.CheckPasswordHash(
 			loginRequest.Password,
 			user.PasswordHash,
 		)
-		if err != nil {
 
+		if err != nil {
 			response.WriteError(
 				w,
 				http.StatusUnauthorized,
@@ -51,14 +51,28 @@ func LoginHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		//password matches
+		// Email + password are valid.
+		// Generate JWT for this user.
+		token, err := auth.GenerateToken(user.ID)
+		if err != nil {
+			response.WriteError(
+				w,
+				http.StatusInternalServerError,
+				"Failed to generate token",
+			)
+			return
+		}
+
+		// Return token to client
 		err = response.WriteJSON(
 			w,
 			http.StatusOK,
 			map[string]string{
 				"message": "Login successful",
+				"token":   token,
 			},
 		)
+
 		if err != nil {
 			response.WriteError(
 				w,
@@ -67,6 +81,5 @@ func LoginHandler(db *sql.DB) http.HandlerFunc {
 			)
 			return
 		}
-
 	}
 }
