@@ -6,6 +6,7 @@ import (
 
 	"github.com/ksoha/email-dispatcher/internal/database"
 	"github.com/ksoha/email-dispatcher/internal/handlers"
+	"github.com/ksoha/email-dispatcher/internal/middleware"
 )
 
 func main() {
@@ -42,9 +43,11 @@ func main() {
 		handlers.CreateCampaignHandler(db),
 	)
 
-	router.HandleFunc(
+	router.Handle(
 		"GET /campaigns",
-		handlers.GetCampaignsHandler(db),
+		middleware.AuthMiddleware(
+			handlers.GetCampaignsHandler(db),
+		),
 	)
 
 	// route POST /campaigns/{id}/send

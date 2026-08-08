@@ -41,7 +41,7 @@ func GenerateToken(userID string) (string, error) {
 // function to validate the JWT token
 func ValidateToken(tokenString string) (string, error) {
 	//empty claims struct that will be populated with the claims from the token
-	claims := Claims{}
+	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(
 		tokenString,
