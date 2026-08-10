@@ -16,3 +16,9 @@ type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+// struct to handle sign up request
+type SignUpRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
