@@ -83,3 +83,66 @@ func LoginHandler(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
+
+// sign in handler
+func SignUpHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		var signupRequest models.SignUpRequest
+
+		//decoding the json
+		err := json.NewDecoder(r.Body).Decode(&signupRequest)
+		if err != nil {
+			response.WriteError(
+				w,
+				http.StatusBadRequest,
+				"Invalid request Body",
+			)
+			return
+		}
+
+		//Hash the password before storing into the database
+		passwordHash, err := auth.HashPassword(signupRequest.Password)
+		if err != nil {
+			response.WriteError(
+				w,
+				http.StatusInternalServerError,
+				"Failed to hash the password",
+			)
+			return
+		}
+
+		//Create the user in the database
+		user, err := database.CreateUser(
+			db,
+			signupRequest.Email,
+			passwordHash,
+		)
+		if err != nil {
+			response.WriteError(
+				w,
+				http.StatusInternalServerError,
+				"Failed to create user",
+			)
+			return
+		}
+
+		//returning the user details
+		err = response.WriteJSON(
+			w,
+			http.StatusCreated,
+			map[string]string{
+				"message": "User created successfully",
+				"user":    user.Email,
+			},
+		)
+		if err != nil {
+			response.WriteError(
+				w,
+				http.StatusBadGateway,
+				"Failed to encode the response",
+			)
+			return
+		}
+	}
+}

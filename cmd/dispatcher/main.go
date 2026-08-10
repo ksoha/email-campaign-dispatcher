@@ -20,6 +20,12 @@ func main() {
 	//create router
 	router := http.NewServeMux()
 
+	//route POST/signup
+	router.HandleFunc(
+		"POST /signup",
+		handlers.SignUpHandler(db),
+	)
+
 	//route GET/Recipients
 	router.HandleFunc(
 		"GET /recipients",
