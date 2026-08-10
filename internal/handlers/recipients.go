@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
-	"encoding/json"
+	"encoding/csv"
 
 	"github.com/ksoha/email-dispatcher/internal/database"
 	"github.com/ksoha/email-dispatcher/internal/models"
@@ -41,39 +41,88 @@ func GetRecipientsHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-// CreateRecipientHandler handles the POST /recipients endpoint (import)
+// CreateRecipientHandler handles POST /recipients/import
 func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		var recipient models.CreateRecipientRequest
-
-		//the decode fucntion will not return a recipient struct it will just fill the struct recipient
-		err := json.NewDecoder(r.Body).Decode(&recipient)
+		// Get the uploaded CSV file
+		file, _, err := r.FormFile("file")
 		if err != nil {
 			response.WriteError(
 				w,
 				http.StatusBadRequest,
-				"Invalid request",
+				"CSV file is required",
 			)
 			return
 		}
+		defer file.Close()
 
-		err = database.CreateRecipient(db, recipient)
+		// Create a CSV reader
+		reader := csv.NewReader(file)
+
+		// Read all records from the CSV
+		records, err := reader.ReadAll()
 		if err != nil {
 			response.WriteError(
 				w,
-				http.StatusInternalServerError,
-				"Failed to create recipient",
+				http.StatusBadRequest,
+				"Failed to read CSV file",
 			)
 			return
 		}
 
-		//everythin succeded create recipient
+		// CSV should contain a header + at least one recipient
+		if len(records) < 2 {
+			response.WriteError(
+				w,
+				http.StatusBadRequest,
+				"CSV file is empty",
+			)
+			return
+		}
+
+		// Skip the header row
+		for _, record := range records[1:] {
+
+			// Every row should contain name and email
+			if len(record) < 2 {
+				response.WriteError(
+					w,
+					http.StatusBadRequest,
+					"Invalid CSV row",
+				)
+				return
+			}
+
+			recipient := models.CreateRecipientRequest{
+				Name:  record[0],
+				Email: record[1],
+			}
+
+			// Insert recipient into database
+			err := database.CreateRecipient(
+				db,
+				recipient,
+			)
+			if err != nil {
+				response.WriteError(
+					w,
+					http.StatusInternalServerError,
+					"Failed to create recipient",
+				)
+				return
+			}
+		}
+
+		// Everything succeeded
 		err = response.WriteJSON(
 			w,
 			http.StatusCreated,
-			map[string]string{"message": "Recipient Created Successfully"},
+			map[string]string{
+				"message": "Recipients imported successfully",
+			},
 		)
+
 		if err != nil {
 			http.Error(
 				w,

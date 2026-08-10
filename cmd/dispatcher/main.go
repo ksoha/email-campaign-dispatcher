@@ -33,9 +33,11 @@ func main() {
 	)
 
 	//route POST/Recipients/Import
-	router.HandleFunc(
+	router.Handle(
 		"POST /recipients/import",
-		handlers.CreateRecipientHandler(db),
+		middleware.AuthMiddleware(
+			handlers.CreateRecipientHandler(db),
+		),
 	)
 
 	//route POST/login
