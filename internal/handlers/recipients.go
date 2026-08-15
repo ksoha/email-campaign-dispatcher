@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"database/sql"
-	"net/http"
-
 	"encoding/csv"
+	"io"
+	"net/http"
 
 	"github.com/ksoha/email-dispatcher/internal/database"
 	"github.com/ksoha/email-dispatcher/internal/models"
@@ -60,19 +60,9 @@ func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 		// Create a CSV reader
 		reader := csv.NewReader(file)
 
-		// Read all records from the CSV
-		records, err := reader.ReadAll()
+		// Read the header row
+		_, err = reader.Read()
 		if err != nil {
-			response.WriteError(
-				w,
-				http.StatusBadRequest,
-				"Failed to read CSV file",
-			)
-			return
-		}
-
-		// CSV should contain a header + at least one recipient
-		if len(records) < 2 {
 			response.WriteError(
 				w,
 				http.StatusBadRequest,
@@ -81,8 +71,25 @@ func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Skip the header row
-		for _, record := range records[1:] {
+		// Read and process one record at a time
+		for {
+
+			record, err := reader.Read()
+
+			// End of CSV
+			if err == io.EOF {
+				break
+			}
+
+			// CSV parsing error
+			if err != nil {
+				response.WriteError(
+					w,
+					http.StatusBadRequest,
+					"Failed to read CSV file",
+				)
+				return
+			}
 
 			// Every row should contain name and email
 			if len(record) < 2 {
@@ -100,7 +107,7 @@ func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 			}
 
 			// Insert recipient into database
-			err := database.CreateRecipient(
+			err = database.CreateRecipient(
 				db,
 				recipient,
 			)
