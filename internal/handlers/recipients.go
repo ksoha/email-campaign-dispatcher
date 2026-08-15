@@ -60,6 +60,16 @@ func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 		// Create a CSV reader
 		reader := csv.NewReader(file)
 
+		// Batch size
+		const batchSize = 1000
+
+		// Create a batch to hold recipients
+		batch := make(
+			[]models.CreateRecipientRequest,
+			0,
+			batchSize,
+		)
+
 		// Read the header row
 		_, err = reader.Read()
 		if err != nil {
@@ -106,16 +116,47 @@ func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 				Email: record[1],
 			}
 
-			// Insert recipient into database
-			err = database.CreateRecipient(
+			// Add recipient to the current batch
+			batch = append(batch, recipient)
+
+			// When batch reaches 1000 recipients,
+			// insert the entire batch into the database
+			if len(batch) == batchSize {
+
+				err = database.CreateRecipientsBatch(
+					db,
+					batch,
+				)
+
+				if err != nil {
+					response.WriteError(
+						w,
+						http.StatusInternalServerError,
+						"Failed to create recipients",
+					)
+					return
+				}
+
+				// Clear the batch while keeping
+				// the allocated memory
+				batch = batch[:0]
+			}
+		}
+
+		// Insert any remaining recipients
+		// if the total isn't exactly divisible by 1000
+		if len(batch) > 0 {
+
+			err = database.CreateRecipientsBatch(
 				db,
-				recipient,
+				batch,
 			)
+
 			if err != nil {
 				response.WriteError(
 					w,
 					http.StatusInternalServerError,
-					"Failed to create recipient",
+					"Failed to create recipients",
 				)
 				return
 			}
