@@ -90,6 +90,7 @@ func GetCampaignsHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// function that handles sending for a small batch of recipients
 func SendCampaignHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
