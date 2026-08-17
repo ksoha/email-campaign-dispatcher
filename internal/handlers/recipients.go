@@ -60,7 +60,7 @@ func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 		// Create a CSV reader
 		reader := csv.NewReader(file)
 
-		// Batch size
+		// Batch size of 1000 recipients to be inserted into the database at once
 		const batchSize = 1000
 
 		// Create a batch to hold recipients
@@ -81,7 +81,6 @@ func CreateRecipientHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		// Read and process one record at a time
 		for {
 
 			record, err := reader.Read()

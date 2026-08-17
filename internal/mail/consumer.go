@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/smtp"
 	"sync"
-	"time"
 
 	"github.com/ksoha/email-dispatcher/internal/models"
 )
@@ -43,9 +42,6 @@ func EmailWorker(
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		//simulate some delay in sending email
-		time.Sleep(50 * time.Millisecond)
 
 		fmt.Printf("Worker %d sent email to %s\n", id, recipient.Email)
 	}
